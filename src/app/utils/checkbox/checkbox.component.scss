@@ -1,3 +1,6 @@
+@import "src/assets/scss/bootstrap/_functions.scss";
+@import "src/assets/scss/bootstrap/_variables.scss";
+
 .overlay {
   top: 0;
   left: 0;
@@ -8,11 +11,16 @@
 .check {
   display: inline-block;
   height: 10px;
-  width: 5px;
+  width: 4px;
   -webkit-transform: rotate(45deg);
   transform: rotate(45deg);
   border-bottom: 2px solid;
   border-right: 2px solid;
   margin-left: 6px;
   margin-top: -2px;
+}
+
+.bg-primary{
+  background-color: $primary;
+  border-color: $primary;
 }

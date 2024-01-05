@@ -33,12 +33,14 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
   };
   subscriptions: any;
   showNewFlowWindow: boolean;
+  showNewBundleWindow: boolean;
   showLazyLoader: boolean;
   showYamlWindow: boolean;
   selectedFlow: any;
   copied: any;
   showOptionsDropdown: any;
   selectedItemEvent: any
+  selectedBundle: any;
   selectedLibrary: any;
   sortModel: any;
   breadcrumbPaths: Array<Breadcrumb>;
@@ -49,6 +51,11 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
   staterPluginList: Array<any>;
   pluginFilter: string;
   baseUrl: string;
+  bundleList: Array<any>=[];
+  bundleToggle: any = {};
+  bundles: Array<any>=[];
+  showBundleActionDropdown: any = {};
+  bundleStates: boolean[] = new Array(this.bundles.length).fill(false);
   constructor(public commonService: CommonService,
     private appService: AppService,
     private router: Router,
@@ -91,6 +98,7 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
   }
   ngOnInit() {
     this.getFlows();
+    this.getBundles();
     this.getStaterPlugins();
     this.commonService.changeBreadcrumb(this.breadcrumbPaths);
     this.commonService.apiCalls.componentLoading = false;
@@ -298,10 +306,32 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
         // this.flowList.push(item);
       });
       this.flowList = res;
-      this.flowList.forEach(e => {
+      const groupedItems = {};
+
+      // Group items based on the "bundle name" attribute
+      res.forEach((item) => {
+        const bundleName = "Non-bundled"; // Use "unnamed" if "bundle name" is missing or empty
+        if (!groupedItems[bundleName]) {
+          groupedItems[bundleName] = [];
+        }
+        groupedItems[bundleName].push(item);
+      });
+
+      // Convert the grouped items back to an array of objects
+      this.bundles = Object.keys(groupedItems).map((bundleName) => ({
+        "name": bundleName,
+        bundle: groupedItems[bundleName],
+      }));
+      this.bundles = this.bundles.concat(this.bundles, this.bundles)
+      this.bundles.forEach((e, i) => {
+        this.showBundleActionDropdown[i] = false
+      })
+      console.log(this.bundles);
+      this.flowList.forEach((e,i) => {
         if (e.status == 'Pending') {
           this.commonService.updateStatus(e._id, 'flow');
         }
+        this.bundleList[i] = false
       })
     }, err => {
       this.showLazyLoader = false;
@@ -321,6 +351,17 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
       const msg = name + ' is now ' + res.status;
       res.status === 'Active' ? this.ts.success(msg) : this.ts.error(msg)
     });
+  }
+
+  getBundles(){
+    return this.commonService.get('partnerManager', `/${this.commonService.app._id}/deployment/bundle`, {}).subscribe(
+      {
+        next: (res) => {
+          this.bundles = res;
+        },
+        error: (err) => {}
+      }
+    );
   }
 
   getStaterPlugins() {
@@ -600,14 +641,35 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
     this.selectedFlow = item;
     if (!this.selectedFlow.serviceYaml || !this.selectedFlow.deploymentYaml) {
       this.commonService.get('partnerManager', `/${this.commonService.app._id}/flow/utils/${item._id}/yamls`, {})
-        .subscribe(data => {
-          this.selectedFlow.serviceYaml = data.service;
-          this.selectedFlow.deploymentYaml = data.deployment;
-          this.showYamlWindow = true;
-        },
-          (err) => {
-            this.commonService.errorToast(err);
-          });
+        .subscribe({
+          next: data => {
+            this.selectedFlow.serviceYaml = data.service;
+            this.selectedFlow.deploymentYaml = data.deployment;
+            this.showYamlWindow = true;
+          },
+            error: (err) => {
+              this.commonService.errorToast(err);
+            }
+        });
+    } else {
+      this.showYamlWindow = true;
+    }
+  }
+
+  getBundleYamls(item: any) {
+    this.selectedFlow = item;
+    if (!this.selectedFlow.serviceYaml || !this.selectedFlow.deploymentYaml) {
+      this.commonService.get('partnerManager', `/${this.commonService.app._id}/deployment/bundle/utils/${item._id}/yamls`, {})
+        .subscribe({
+          next: data => {
+            this.selectedFlow.serviceYaml = data.service;
+            this.selectedFlow.deploymentYaml = data.deployment;
+            this.showYamlWindow = true;
+          },
+            error: (err) => {
+              this.commonService.errorToast(err);
+            }
+        });
     } else {
       this.showYamlWindow = true;
     }
@@ -653,6 +715,14 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
     this.showOptionsDropdown[i] = true;
   }
 
+  showBundleActions(event, i){
+    this.selectedBundle = event;
+    Object.keys(this.showBundleActionDropdown).forEach(ele => {
+      this.showBundleActionDropdown[ele] = false
+    });
+    this.showBundleActionDropdown[i] = event;
+  }
+
   checkPlugin(item: any) {
     this.staterPluginList.forEach(val => {
       val._selected = false;
@@ -674,8 +744,73 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
     return '/' + url.split('/').pop();
   }
 
+  checkFlowForBundle(event, flow){
+    console.log(event);
+    if(event){
+      this.bundleList.push(flow._id)
+    }else{
+      this.bundleList = this.bundleList.filter(ele => ele !== flow._id)
+    }
+  }
+
+  isChecked(flow){
+    return this.bundleList.find(ele => flow._id === ele)
+  }
+  triggerBundleCreate(){
+    if(!this.invalidForm){
+      this.showLazyLoader = true;
+      this.showNewBundleWindow = false;
+      const payload = {};
+      payload['name']= this.form.get('name').value;
+      payload['app']= this.commonService.app._id;
+      payload['bundle']= this.bundleList;
+      this.commonService.post('partnerManager', `/${this.commonService.app._id}/deployment/bundle`, payload).subscribe({next : (res) => {
+        this.showLazyLoader = false;
+        this.bundleList = []
+        this.form.reset({ type: 'API' });
+        this.ts.success('Bundle has been created.');
+      }, 
+      error: err => {
+        this.showLazyLoader = false;
+        this.form.reset({ type: 'API' });
+        this.commonService.errorToast(err);
+      }});
+    }
+  }
+
+  triggerBundle(id, action){
+    this.commonService.put('partnerManager', `/${this.commonService.app._id}/deployment/bundle/utils/${id}/${action}`, ).subscribe({next : (res) => {}})
+  }
+
+  bundleAction(id, action){
+    const payload = {
+      name: this.form.get('name').value,
+      flow: this.bundleList
+    }
+    console.log('hello');
+    // switch(action){
+    //   case 'get' : 
+    //   this.commonService.get('partnerManager', `/${this.commonService.app._id}/deployment/bundle/${id}`, ).subscribe({next : (res) => {}})
+    //   break;
+    //   case 'edit':
+    //     this.commonService.put('partnerManager', `/${this.commonService.app._id}/deployment/bundle/${id}`, payload).subscribe({next : (res) => {}})
+    //     break;
+    //   case 'delete':  
+    //   this.commonService.delete('partnerManager', `/${this.commonService.app._id}/deployment/bundle/${id}`, ).subscribe({next : (res) => {}})
+    // }
+    
+  }
+
+  hideBundleDropdown(i){
+    this.showBundleActionDropdown[i]=false
+  }
+
+  toggleBundle(index: number) {
+    // Toggle the state for the clicked bundle
+    this.bundleStates[index] = !this.bundleStates[index];
+  }
   get invalidForm() {
-    if (this.form.invalid || (this.form.get('type').value === 'PLUGIN' && !this.selectedPlugin)) {
+    if (this.form.invalid || this.bundleList.length < 2) {
       return true;
     }
     return false;
@@ -689,6 +824,16 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
     let top = (this.selectedItemEvent.clientY + 10);
     if (this.selectedItemEvent.clientY > 430) {
       top = this.selectedItemEvent.clientY - 106
+    }
+    return {
+      top: top + 110 + 'px',
+      right: '50px'
+    };
+  }
+  get bundleDropDownStyle() {
+    let top = (this.selectedBundle.clientY + 10);
+    if (this.selectedBundle.clientY > 430) {
+      top = this.selectedBundle.clientY - 106
     }
     return {
       top: top + 'px',

@@ -21,7 +21,7 @@ export class CheckboxComponent implements OnInit {
       status: false
     };
     this.id = uuid();
-    this.type = 'dark'
+    this.type = 'primary'
     this.size = 18;
     this.disabled = false;
   }
@@ -53,7 +53,7 @@ export class CheckboxComponent implements OnInit {
       classes.push('hover');
     }
     if (this.checked) {
-      classes.push(`bg-${this.type} border-${this.type}`);
+      classes.push(`bg-${this.type}`);
     }
     return classes.join(' ');
   }

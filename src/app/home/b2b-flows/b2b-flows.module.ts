@@ -18,6 +18,9 @@ import { AutoFocusModule } from 'src/app/utils/directives/auto-focus/auto-focus.
 import { B2bSettingsComponent } from './b2b-settings/b2b-settings.component';
 import { RoundRadioModule } from 'src/app/utils/round-radio/round-radio.module';
 import { ViewBoxModule } from 'src/app/utils/view-box/view-box.module';
+import { CheckboxModule } from 'src/app/utils/checkbox/checkbox.module';
+import {MatExpansionModule} from '@angular/material/expansion';
+
 
 const routes: Routes = [
   {
@@ -48,7 +51,9 @@ const routes: Routes = [
     OnChangeModule,
     AutoFocusModule,
     RoundRadioModule,
-    ViewBoxModule
+    ViewBoxModule,
+    CheckboxModule,
+    MatExpansionModule
   ],
   exports: [B2bFlowsComponent]
 })

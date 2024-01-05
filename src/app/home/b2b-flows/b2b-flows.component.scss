@@ -147,3 +147,43 @@
   overflow-y: auto;
   max-height: 300px;
 }
+
+.bundleList{
+  max-height: 75vh;
+  padding: 1px;
+  overflow: auto;
+}
+
+mat-expansion-panel-header{
+  pointer-events: none;
+}
+
+.pointer{
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.bundle-action{
+  position: fixed;
+  // top: 200px;
+  // right: 100px;
+  z-index: 2;
+}
+
+.bundle{
+  .bundle-actions {
+    position: absolute;
+   right: -500px;
+   transition: 0.2s;
+  }
+
+  .bundle-actions-item{
+    height: 32px;
+  }
+
+  &:hover{
+    .bundle-actions {
+      right: 120px;
+    }
+  }
+}
