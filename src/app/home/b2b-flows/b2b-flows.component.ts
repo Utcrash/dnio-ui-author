@@ -308,21 +308,19 @@ export class B2bFlowsComponent implements OnInit, OnDestroy {
       this.flowList = res;
       const groupedItems = {};
 
-      // Group items based on the "bundle name" attribute
-      res.forEach((item) => {
-        const bundleName = "Non-bundled"; // Use "unnamed" if "bundle name" is missing or empty
-        if (!groupedItems[bundleName]) {
-          groupedItems[bundleName] = [];
-        }
-        groupedItems[bundleName].push(item);
-      });
+      // res.forEach((item) => {
+      //   const bundleName = "Non-bundled"; // Use "unnamed" if "bundle name" is missing or empty
+      //   if (!groupedItems[bundleName]) {
+      //     groupedItems[bundleName] = [];
+      //   }
+      //   groupedItems[bundleName].push(item);
+      // });
 
-      // Convert the grouped items back to an array of objects
-      this.bundles = Object.keys(groupedItems).map((bundleName) => ({
-        "name": bundleName,
-        bundle: groupedItems[bundleName],
-      }));
-      this.bundles = this.bundles.concat(this.bundles, this.bundles)
+      // this.bundles = Object.keys(groupedItems).map((bundleName) => ({
+      //   "name": bundleName,
+      //   bundle: groupedItems[bundleName],
+      // }));
+      // this.bundles = this.bundles.concat(this.bundles, this.bundles)
       this.bundles.forEach((e, i) => {
         this.showBundleActionDropdown[i] = false
       })
