@@ -32,6 +32,7 @@ export interface Properties {
     createOnly?: boolean;
     unique?: boolean;
     precision?: number;
+    primaryKey?: number;
 }
 
 export enum Currency {

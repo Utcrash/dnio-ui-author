@@ -2,7 +2,7 @@
 
   <!-- DEFAULT VALUE -->
   <div class="d-flex w-100  flex-column mb-4" *ngIf="form.get('properties.default') && !form.get('properties.longText')?.value &&
-    !form.get('properties.richText')?.value && !isLibrary && !isDataFormat">
+    !form.get('properties.richText')?.value && !isLibrary && !isDataFormat && !isPrimaryKeySelected()">
     <div>
       <div class="font-14 fw-300 text-dark mb-2">Default Value</div>
       <div class=" position-relative">

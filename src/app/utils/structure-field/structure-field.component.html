@@ -37,6 +37,10 @@
                 </div>
                 <div class="field-flag-holder d-flex justify-content-start">
                     <span
+                    class="ml-2 rounded-circle properties create-only d-flex justify-content-center align-items-center text-white fw-500 font-12"
+                    *ngIf="form.get('properties.primaryKey') && form.get('properties.primaryKey').value"
+                    ngbTooltip="Primary Key">P</span>
+                    <span
                         class="ml-2 rounded-circle properties required d-flex justify-content-center align-items-center text-white fw-500 font-12"
                         *ngIf="form.get('properties.required') && form.get('properties.required').value"
                         ngbTooltip="Required">R</span>

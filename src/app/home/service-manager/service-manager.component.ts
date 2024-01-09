@@ -915,9 +915,11 @@ export class ServiceManagerComponent implements OnInit, OnDestroy {
   }
 
   selectConnector(event, type) {
+    this.tableType ='new';
     this.form.get('connectors').get(type).setValue({
-      _id: event.target.value
+      _id: event?.target?.value || event
     })
+
   //  this.fetchTables(event.target.value);
   }
 
@@ -1089,6 +1091,14 @@ export class ServiceManagerComponent implements OnInit, OnDestroy {
        return ele.type
     }
       ).filter(Boolean))
+  }
+
+  get isFormInvalid(){
+    const checkData = this.form.get('connectors')?.get('data')?.value?.options || '';
+    if(!this.form.get('schemaFree').value && this.tableType === 'existing' && !checkData.tableName){
+      return true;
+    }
+    return this.form.invalid
   }
 
 }

@@ -55,6 +55,9 @@ export class CheckboxComponent implements OnInit {
     if (this.checked) {
       classes.push(`bg-${this.type} border-${this.type}`);
     }
+    if(this.disabled) {
+      classes.push('disabled');
+    }
     return classes.join(' ');
   }
 }

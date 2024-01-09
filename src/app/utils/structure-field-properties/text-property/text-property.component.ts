@@ -408,4 +408,10 @@ export class TextPropertyComponent implements OnDestroy {
     }
   }
 
+  isPrimaryKeySelected() {
+    const mainDef = this.mainForm.get('definition').value;
+    const primaryDef = mainDef.find(def => def?.properties?.primaryKey);
+    return (primaryDef && primaryDef?._fieldId === this.form?.get('_fieldId')?.value)
+  }
+
 }

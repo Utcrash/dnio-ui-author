@@ -1,4 +1,4 @@
-import { Component, OnDestroy, Input, TemplateRef, ViewChild, AfterViewInit, AfterContentChecked, OnInit } from '@angular/core';
+import { Component, OnDestroy, Input, TemplateRef, ViewChild, AfterViewInit, AfterContentChecked, OnInit, EventEmitter } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 
 import { SchemaBuilderService } from 'src/app/home/schema-utils/schema-builder.service';
@@ -21,6 +21,7 @@ export class StructureFieldPropertiesComponent implements OnDestroy, AfterViewIn
   @Input() edit: any;
   @Input() type: string;
   showProperties: boolean;
+  openAlertModal: EventEmitter<any>;
   @ViewChild('typeChangeModalTemplate', { static: false }) typeChangeModalTemplate: TemplateRef<any>;
   showDatePicker: boolean;
   showLazyLoader: boolean;
@@ -30,6 +31,11 @@ export class StructureFieldPropertiesComponent implements OnDestroy, AfterViewIn
   _dateFrom: Date;
   form: UntypedFormGroup;
   showCommonFields: boolean;
+  alertModal: {
+    title: string;
+    message: string;
+    data: any;
+  };
   private subscriptions: any;
   public get dateFrom(): Date {
     const self = this;
@@ -57,6 +63,13 @@ export class StructureFieldPropertiesComponent implements OnDestroy, AfterViewIn
     self.showDataTypes = {};
     self.showCommonFields = true;
     self.showProperties = false;
+    this.alertModal = {
+      title: '',
+      message: '',
+      data: {}
+    };
+
+    this.openAlertModal = new EventEmitter();
 
   }
 
@@ -217,12 +230,16 @@ export class StructureFieldPropertiesComponent implements OnDestroy, AfterViewIn
 
   toggleCheck(prop: UntypedFormControl, key?: string) {
     const self = this;
+    const value = !prop.value
     if (self.canEdit) {
-      prop.patchValue(!prop.value);
+      prop.patchValue(value);
       self.form.markAsDirty();
     }
+    if(key === 'properties.primaryKey' && self.canEdit && value) {
+      this.form.get('properties.required').patchValue(value)
+      this.form.get('properties.unique').patchValue(value)
+    }
     if (key && key == 'schemaFree') {
-      console.log(this.form);
       if (prop.value) {
         self.form.removeControl('definition');
         // (this.form.get('definition') as UntypedFormArray).controls.splice(0);
@@ -406,4 +423,20 @@ toggleDisable(){
   })
   this.form.get('definition').patchValue(definitions);
 }
+
+  disablePrimaryKey(fieldId) {
+    const mainDef = this.mainForm.get('definition').value;
+    const primaryDef = mainDef.find(def => def?.properties?.primaryKey);
+    return (primaryDef && primaryDef?._fieldId !== fieldId)
+  }
+
+  checkOtherProps(fieldId){
+    const mainDef = this.mainForm.get('definition').value;
+    const primaryDef = mainDef.find(def => def?.properties?.primaryKey);
+    return (primaryDef && primaryDef?._fieldId === fieldId)
+  }
+
+  showPrimaryKey(){
+    return !['enum','rich','long','currency'].includes(this.form?.get('properties._detailedType')?.value)
+  }
 }

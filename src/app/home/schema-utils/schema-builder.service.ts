@@ -75,6 +75,11 @@ export class SchemaBuilderService {
         } else {
             temp.addControl('_detailedType', new UntypedFormControl(''));
         }
+
+        if(value.type === 'String' || value.type === 'Number'){
+            temp.addControl('primaryKey', new UntypedFormControl(value.properties
+                && value.properties.primaryKey ? value.properties.primaryKey : null));
+        }
         if (value.type === 'String'
             || value.type === 'Number'
             || value.type === 'Relation'

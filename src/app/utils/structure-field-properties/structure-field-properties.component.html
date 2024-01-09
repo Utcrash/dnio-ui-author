@@ -77,10 +77,18 @@
         <div class="w-100 justify-content-center" *ngIf="!checkStateModel()">
           <div class="font-16 fw-400 mt-40 mb-3" *ngIf="formItem.get('key').value !== '_self'">Properties</div>
           <div class=" d-flex align-items-center w-100 pb-3" [ngClass]="{'hover':canEdit}"
+            *ngIf="formItem.get('properties.primaryKey') && formItem.get('key').value !== '_self' && showPrimaryKey()">
+            <odp-checkbox id="primaryKey" [edit]="edit" (checkedChange)="toggleCheck(formItem.get('properties.primaryKey'), 'properties.primaryKey')"
+              [checked]="formItem.get('properties.primaryKey').value" [disabled]="disablePrimaryKey(form.get('_fieldId').value)"></odp-checkbox>
+            <span
+              class="ml-2 rounded-circle properties required d-flex justify-content-center align-items-center text-white fw-500 font-12">P</span>
+            <span class="ml-2 text-dark font-14 fw-300">Primary Key</span>
+          </div>
+          <div class=" d-flex align-items-center w-100 pb-3" [ngClass]="{'hover':canEdit}"
             *ngIf="formItem.get('properties.required') && formItem.get('key').value !== '_self'">
             <odp-checkbox id="reqAttr" [edit]="edit"
               (checkedChange)="toggleCheck(formItem.get('properties.required'))"
-              [checked]="formItem.get('properties.required').value"></odp-checkbox>
+              [checked]="formItem.get('properties.required').value" [disabled]="checkOtherProps(form.get('_fieldId').value)"></odp-checkbox>
             <span
               class="ml-2 rounded-circle properties required d-flex justify-content-center align-items-center text-white fw-500 font-12">R</span>
             <span class="ml-2 text-dark font-14 fw-300">Required</span>
@@ -98,7 +106,7 @@
             *ngIf="formItem.get('properties.unique') && formItem.get('key').value !== '_self' && !isDataFormat">
             <odp-checkbox id="UniqAttr" [edit]="{ status: canEdit }"
               (checkedChange)="toggleCheck(formItem.get('properties.unique'))"
-              [checked]="formItem.get('properties.unique').value"></odp-checkbox>
+              [checked]="formItem.get('properties.unique').value" [disabled]="checkOtherProps(form.get('_fieldId').value)"></odp-checkbox>
             <span
               class="ml-2 rounded-circle properties unique d-flex justify-content-center align-items-center text-white fw-500 font-12">U</span>
             <span class="ml-2 text-dark font-14 fw-300">Unique</span>
@@ -107,7 +115,7 @@
             *ngIf="formItem.get('properties.password') && (formItem.get('properties._detailedType').value !== 'email') && formItem.get('properties._detailedType').value !== 'enum' && !isDataFormat ">
             <odp-checkbox id="secureAttr" [edit]="{ status: canEdit }"
               (checkedChange)="toggleCheck(formItem.get('properties.password'))"
-              [checked]="formItem.get('properties.password').value"></odp-checkbox>
+              [checked]="formItem.get('properties.password').value" [disabled]="checkOtherProps(form.get('_fieldId').value)"></odp-checkbox>
             <span
               class="ml-2 rounded-circle properties password d-flex justify-content-center align-items-center text-white fw-500 font-12">S</span>
             <span class="ml-2 text-dark font-14 fw-300">Secure</span>
